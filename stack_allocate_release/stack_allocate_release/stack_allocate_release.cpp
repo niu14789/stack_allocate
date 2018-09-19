@@ -80,7 +80,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if(len_b==0)
 		{
-			if(release_b==0)
+			if(len_r==0)
 			{
 				/* ok */
 				printf("allocate ok\n");

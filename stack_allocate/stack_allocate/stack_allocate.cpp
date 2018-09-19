@@ -15,8 +15,8 @@ static unsigned int mark[4]  = {RAM_ID_HEAD,RAM_ID_TAIL,ROM_ID_HEAD,ROM_ID_TAIL}
 
 static unsigned int endfile[3] = {0xf1f2f3f4,0xe1e2e3e4,0xd1d2d3d4};
 
-const char *to_search="..\\d200_drone\\opk\\*ok"; 
-static char name_buffer[4][200];//0x420000(rom addr) , 0x20400000(ram addr) , output path ,control
+//const char *to_search="..\\d200_drone\\opk\\*ok"; 
+static char name_buffer[20][200];//0x420000(rom addr) , 0x20400000(ram addr) , output path ,control
 
 static unsigned int base_rom_addr = 0;
 static unsigned int base_ram_addr = 0;
@@ -28,7 +28,7 @@ static unsigned int enter_cnt = 0;
 static char config = 0;
 static unsigned char flag_bh = 1;
 
-int stack_rom_allocate(char *file_name);
+int stack_rom_allocate(char *file_name,char *);
 void arom_write(unsigned int * data);
 
 FILE *fp_ok_read;
@@ -55,9 +55,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	enter_cnt = 0;
     /* get base addr */
     
-    if(argc != 5)
+    if(argc != 6)
 	{
-		printf("stack allocate fail,only accept 4 params , now is %d",argc - 1);
+		printf("stack allocate fail,only accept 5 params , now is %d\r\n",argc - 1);
 		return (-1);
 	}
 
@@ -94,11 +94,12 @@ int _tmain(int argc, _TCHAR* argv[])
 		printf("unsupply param %s\n", name_buffer[3]);
 		return 0;
 	}
-
-	printf("base ram:0x%08x\n",base_ram_addr);
-    printf("out path %s\n",name_buffer[2]);
-	printf("config %s \n",config?".h":".b");
-
+	/*-----------------------------------*/
+	printf("ver : 0.1.5_AT_201809190959\r\n");
+	printf("base ram : 0x%08x\n",base_ram_addr);
+    printf("out path : %s\n",name_buffer[2]);
+	printf("config : %s \n",config?".h":".b");
+	printf("ok file path : %s\r\n",name_buffer[4]);
     /* addr == config */
 
     current_allocate_rom_addr = base_rom_addr;
@@ -117,7 +118,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	/*-----------*/
 	int handle;
 	struct _finddata_t fileinfo;
-	handle=_findfirst(to_search,&fileinfo);
+
+	char find_path[200];
+
+	sprintf(find_path,"%s/*ok",name_buffer[4]);
+
+	handle=_findfirst(find_path,&fileinfo);
 
 	if(handle == (-1))
 	{
@@ -125,19 +131,31 @@ int _tmain(int argc, _TCHAR* argv[])
 	  return 0;
 	}
 	/* at first time */
-	stack_rom_allocate(fileinfo.name);
+	if( stack_rom_allocate(fileinfo.name,name_buffer[4]) != 0 )
+	{
+		printf("Allocate fail\n");
+		return 0;
+	}
 
 	while(!_findnext(handle,&fileinfo)) 
 	{
-		stack_rom_allocate(fileinfo.name);
+		if( stack_rom_allocate(fileinfo.name,name_buffer[4]) != 0 )
+		{
+			printf("Allocate fail\n");
+			return 0;
+		}
 	}
 
 	/* write in end identify */
 	arom_write(&endfile[0]);
 	arom_write(&endfile[1]);
 	arom_write(&endfile[2]);
-	flag_bh = 2;
-    arom_write(&endfile[2]);
+	/*--------------------*/
+	if( config == 1 )
+	{
+		flag_bh = 2;
+		arom_write(&endfile[2]);
+	}
 	/*-----------------------*/
 
 	fclose(fp_create);
@@ -147,7 +165,7 @@ int _tmain(int argc, _TCHAR* argv[])
 }
 
 
-int stack_rom_allocate(char *name)
+int stack_rom_allocate(char *name,char *path)
 {
 	char file_name[100];
     int len = 0;
@@ -157,7 +175,7 @@ int stack_rom_allocate(char *name)
     unsigned int ram_tmp[2];
 	unsigned int rom_tmp[2];
 
-	sprintf(file_name,"../d200_drone/opk/%s",name);
+	sprintf(file_name,"%s/%s",path,name);
 
 	fp_ok_read = fopen(file_name,"rb");
 
@@ -253,7 +271,7 @@ void arom_write(unsigned int * data)
 	   {
          flag_bh = 0;//first time
 		 memset(buffer,0,200);
-		 sprintf(buffer,"\n/*build time:%s*/\n__attribute__((at(0x%08x))) const unsigned char __FS_rom[] = {\n",__TIME__,base_rom_addr);
+		 sprintf(buffer,"\n/*build time:17:05:15*/\n__attribute__((at(0x%08x))) const unsigned char __FS_rom[] = {\n",base_rom_addr);
          fwrite(buffer,1,strlen(buffer),fp_create);
 	   }else if(flag_bh == 2)
 	   {
