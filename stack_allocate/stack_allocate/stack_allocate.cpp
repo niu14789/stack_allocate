@@ -13,7 +13,7 @@
 
 static unsigned int mark[4]  = {RAM_ID_HEAD,RAM_ID_TAIL,ROM_ID_HEAD,ROM_ID_TAIL};
 
-static unsigned int endfile[3] = {0xf1f2f3f4,0xe1e2e3e4,0xd1d2d3d4};
+static unsigned int endfile_t[3] = {0xf1f2f3f4,0xe1e2e3e4,0xd1d2d3d4};
 
 //const char *to_search="..\\d200_drone\\opk\\*ok"; 
 static char name_buffer[20][200];//0x420000(rom addr) , 0x20400000(ram addr) , output path ,control
@@ -147,20 +147,27 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	/* write in end identify */
-	arom_write(&endfile[0]);
-	arom_write(&endfile[1]);
-	arom_write(&endfile[2]);
+	arom_write(&endfile_t[0]);
+	arom_write(&endfile_t[1]);
+	arom_write(&endfile_t[2]);
+	/*--------------------*/
+	arom_write(&current_allocate_rom_addr);
+	arom_write(&current_allocate_ram_addr);
+	unsigned int tail = 0xFDEA3B59;
+	arom_write(&tail);
 	/*--------------------*/
 	if( config == 1 )
 	{
 		flag_bh = 2;
-		arom_write(&endfile[2]);
+		arom_write(&endfile_t[2]);
 	}
 	/*-----------------------*/
 
 	fclose(fp_create);
     fclose(fp_ok_read);
-    printf("Allocate ok\n");
+	/* open */
+    printf("Allocate ok    ROM : 0x%08x  RAM : 0x%08x \r\n",current_allocate_rom_addr,current_allocate_ram_addr);
+	/* ok */
 	return 0;
 }
 
@@ -277,6 +284,7 @@ void arom_write(unsigned int * data)
 	   {
          flag_bh = 0;//first time
          fwrite(endfile,1,10,fp_create);
+
 		 return;
 	   }else
 	   {
