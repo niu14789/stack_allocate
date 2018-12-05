@@ -72,18 +72,21 @@ int _tmain(int argc, _TCHAR* argv[])
 		printf("%s create fail\n",name_buffer[2]);
 		return 0;
 	}
-
+	unsigned int size_file_d = 0 , size_file_r = 0;
     while(1)
 	{
 		len_b = fread(&data_b,1,sizeof(data_b),fp_bebug);
         len_r = fread(&release_b,1,sizeof(release_b),fp_release);
+
+		size_file_d += len_b;
+		size_file_r += len_r;
 
 		if(len_b==0)
 		{
 			if(len_r==0)
 			{
 				/* ok */
-				printf("allocate ok\n");
+				printf("allocate ok , %d ->%d\n",size_file_d,size_file_r);
 				fclose(fp_bebug);
 				fclose(fp_release);
                 fclose(fp_output);
@@ -92,7 +95,8 @@ int _tmain(int argc, _TCHAR* argv[])
 			else
 			{
 				/* fail */
-				printf("allocate fail -> file size not same\n");
+				printf("allocate fail -> Size are not same %d ->%d\n",size_file_d,len_r);
+				return 0;
 			}
 		}
         
@@ -117,7 +121,7 @@ int _tmain(int argc, _TCHAR* argv[])
                 fwrite(&mark[3],1,4,fp_output);
 			}else
 			{
-				printf("bad data\n");
+				printf("bad data OFFSET:0x%X 0x%X -> 0x%X\n",size_file_d , data_b,release_b);
 				printf("allocate fail\n");
 				fclose(fp_bebug);
 				fclose(fp_release);
