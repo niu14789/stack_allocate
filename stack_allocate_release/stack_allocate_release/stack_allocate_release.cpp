@@ -47,8 +47,6 @@ int _tmain(int argc, _TCHAR* argv[])
        Tchar_to_char(argv[i],name_buffer[i-1]);
 	}
 
-	printf("%s %s %s %s\n",name_buffer[0],name_buffer[1],name_buffer[2],name_buffer[3]);
-
 	fp_bebug = fopen(name_buffer[0],"rb");
     
 	if(fp_bebug == NULL)
