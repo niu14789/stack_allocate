@@ -16,6 +16,8 @@ static char name_buffer[4][200];//debug,release,output,control
 
 static unsigned int data_b,release_b;
 
+#pragma  comment(  linker,  "/subsystem:\"windows\"  /entry:\"wmainCRTStartup\""  )
+
 FILE *fp_bebug = NULL,*fp_release = NULL,*fp_output;
 
 int Tchar_to_char(_TCHAR * tchar,char * buffer)
@@ -84,7 +86,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			if(len_r==0)
 			{
 				/* ok */
-				printf("allocate ok , %d ->%d\n",size_file_d,size_file_r);
+				printf("allocate ok , %d ->%d,%s\n",size_file_d,size_file_r,name_buffer[2]);
 				fclose(fp_bebug);
 				fclose(fp_release);
                 fclose(fp_output);
