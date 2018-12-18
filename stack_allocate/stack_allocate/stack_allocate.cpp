@@ -5,7 +5,7 @@
 #include "io.h"
 #include "string.h"
 
-#pragma  comment(  linker,  "/subsystem:\"windows\"  /entry:\"wmainCRTStartup\""  )
+//#pragma  comment(  linker,  "/subsystem:\"windows\"  /entry:\"wmainCRTStartup\""  )
 
 #define RAM_ID_HEAD (0x353ab756)
 #define RAM_ID_TAIL (0xacb8562d)
